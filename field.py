@@ -28,7 +28,7 @@ class Field:
             self.field[last_place[0]][last_place[1]].is_live = True
             for i in range(max(0, last_place[0] - 1), min(last_place[0] + 2, _FIELD_SIZE)):
                 for j in range(max(0, last_place[1] - 1), min(last_place[1] + 2, _FIELD_SIZE)):
-                    if not self.field[i][j].is_live:
+                    if int(self.field[i][j]) == 0:
                         possible_places.add((i, j))
 
             if (last_place[0], last_place[1]) in possible_places:
