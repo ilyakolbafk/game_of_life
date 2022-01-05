@@ -2,8 +2,9 @@ from random import choice
 from cell import *
 from time import sleep
 
-_FIELD_SIZE = 31
-_FIELD_CENTER_POSITION = _FIELD_SIZE // 2
+_FIELD_SIZE = 41
+_CENTER_POSITION = _FIELD_SIZE // 2
+_TIME_FOR_SLEEP = 0.5
 
 
 class Field:
@@ -17,17 +18,12 @@ class Field:
         self.last_configuration = list()
         self.field = [[Cell() for _ in range(_FIELD_SIZE)] for _ in range(_FIELD_SIZE)]
 
-    def clear(self):
-        self.step_counter = 0
-        self.configurations = set()
-        self.field = [['   ' for _ in range(_FIELD_SIZE)] for _ in range(_FIELD_SIZE)]
-
     def append(self, i, j):
         self.field[i - 1][j - 1].is_live = True
 
     def generate(self, c):
         possible_places = set()
-        last_place = (_FIELD_CENTER_POSITION, _FIELD_CENTER_POSITION)
+        last_place = (_CENTER_POSITION, _CENTER_POSITION)
         for _ in range(c):
             self.field[last_place[0]][last_place[1]].is_live = True
             for i in range(max(0, last_place[0] - 1), min(last_place[0] + 2, _FIELD_SIZE)):
@@ -38,9 +34,6 @@ class Field:
             if (last_place[0], last_place[1]) in possible_places:
                 possible_places.remove((last_place[0], last_place[1]))
             last_place = choice(list(possible_places))
-        self.field_transfer()
-        self.last_configuration = [(i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE)
-                                   if self.field[i][j].is_live]
 
     def field_transfer(self):
         for i in range(_FIELD_SIZE):
@@ -68,15 +61,18 @@ class Field:
                 self.field[i][j].neighbors.remove(self.field[i][j])
 
     def play(self):
+        self.field_transfer()
+        self.last_configuration = [(i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE)
+                                   if self.field[i][j].is_live]
         print(self)
         self.find_neighbors()
         while self.last_configuration != [] and self.last_configuration not in self.configurations:
             self.step_counter += 1
-            if not self.step_counter % 5:
+            if not self.step_counter % 4:
                 self.field_transfer()
                 self.find_neighbors()
             self.configurations.append(self.last_configuration)
-            sleep(1)
+            sleep(_TIME_FOR_SLEEP)
             self.step()
         print('Game is over on step ' + str(self.step_counter))
 
@@ -93,20 +89,20 @@ class Field:
 
     def __str__(self):
         result = 'STEP ' + str(self.step_counter) + '\n\t'
-        for i in range(max(0, self.left - 2), min(self.right + 3, _FIELD_SIZE)):
+        for i in range(max(0, self.left - 3), min(self.right + 4, _FIELD_SIZE)):
             result += '  ' + str(i + 1)
             if i < 9:
                 result += ' '
-        for i in range(max(0, self.top - 2), min(self.bot + 3, _FIELD_SIZE)):
+        for i in range(max(0, self.top - 3), min(self.bot + 4, _FIELD_SIZE)):
             if i == 0:
                 result += '\n\t' + ',---' + '+---' * (
-                        min(self.right + 3, _FIELD_SIZE) - max(0, self.left - 2) - 1) + ',\n'
+                        min(self.right + 4, _FIELD_SIZE) - max(0, self.left - 3) - 1) + ',\n'
             else:
                 result += '\n\t' + '!---' + '+---' * (
-                        min(self.right + 3, _FIELD_SIZE) - max(0, self.left - 2) - 1) + '!\n'
+                        min(self.right + 4, _FIELD_SIZE) - max(0, self.left - 3) - 1) + '!\n'
             result += str(i + 1) + '\t' + '|'
-            for j in range(max(0, self.left - 2), min(self.right + 3, _FIELD_SIZE)):
+            for j in range(max(0, self.left - 3), min(self.right + 4, _FIELD_SIZE)):
                 result += str(self.field[i][j]) + '|'
         result += '\n\t' + '\'---' + '+---' * (
-                min(self.right + 3, _FIELD_SIZE) - max(0, self.left - 2) - 1) + '\'\n'
+                min(self.right + 4, _FIELD_SIZE) - max(0, self.left - 3) - 1) + '\'\n'
         return result
