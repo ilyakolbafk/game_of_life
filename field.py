@@ -2,8 +2,8 @@ from random import choice
 from cell import *
 from time import sleep
 
-_FIELD_SIZE = 21
-_FIELD_CENTER_POSITION = 10
+_FIELD_SIZE = 31
+_FIELD_CENTER_POSITION = _FIELD_SIZE // 2
 
 
 class Field:
@@ -13,8 +13,8 @@ class Field:
         self.left = 0
         self.right = 0
         self.step_counter = 0
-        self.configurations = set()
-        self.last_configuration = set()
+        self.configurations = list()
+        self.last_configuration = list()
         self.field = [[Cell() for _ in range(_FIELD_SIZE)] for _ in range(_FIELD_SIZE)]
 
     def clear(self):
@@ -39,8 +39,8 @@ class Field:
                 possible_places.remove((last_place[0], last_place[1]))
             last_place = choice(list(possible_places))
         self.field_transfer()
-        self.last_configuration = set(
-            (i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE) if self.field[i][j].is_live)
+        self.last_configuration = [(i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE)
+                                   if self.field[i][j].is_live]
 
     def field_transfer(self):
         for i in range(_FIELD_SIZE):
@@ -68,15 +68,17 @@ class Field:
                 self.field[i][j].neighbors.remove(self.field[i][j])
 
     def play(self):
+        print(self)
         self.find_neighbors()
-        while self.is_live and self.last_configuration not in self.configurations:
+        while self.last_configuration != [] and self.last_configuration not in self.configurations:
             self.step_counter += 1
             if not self.step_counter % 5:
                 self.field_transfer()
                 self.find_neighbors()
-            self.configurations.add(self.last_configuration)
+            self.configurations.append(self.last_configuration)
             sleep(1)
             self.step()
+        print('Game is over on step ' + str(self.step_counter))
 
     def step(self):
         for i in self.field:
@@ -85,16 +87,9 @@ class Field:
         for i in self.field:
             for j in i:
                 j.step()
-        self.last_configuration = set(
-            (i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE) if self.field[i][j].is_live)
+        self.last_configuration = [(i, j) for i in range(_FIELD_SIZE) for j in range(_FIELD_SIZE)
+                                   if self.field[i][j].is_live]
         print(self)
-
-    def is_live(self):
-        for i in self.field:
-            for j in i:
-                if int(j) > 0:
-                    return True
-        return False
 
     def __str__(self):
         result = 'STEP ' + str(self.step_counter) + '\n\t'

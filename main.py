@@ -1,5 +1,5 @@
 from field import *
 
 game = Field()
-game.generate(10)
-print(game)
+game.generate(5)
+game.play()
